@@ -20,4 +20,8 @@ public class UrlService {
     public List<UrlEntity> getAll() {
         return urlRepo.findAll();
     }
+
+    public UrlEntity findUrlByShortUrl (String shorter){
+        return urlRepo.findUrlByShortUrl(shorter);
+    }
 }
