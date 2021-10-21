@@ -19,5 +19,4 @@ public interface UrlRepo extends JpaRepository<UrlEntity, Integer> {
 
     @Query("SELECT u FROM UrlEntity u WHERE u.originalUrl = ?1 AND u.expiresTime > ?2")
     UrlEntity findUrlEntityByOriginalUrlAndExpiresTime(String fullUrl, ZonedDateTime zonedDateTime);
-
 }

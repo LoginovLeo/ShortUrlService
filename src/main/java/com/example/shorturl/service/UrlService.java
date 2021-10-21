@@ -20,7 +20,6 @@ public class UrlService {
 
     private final UrlRepo urlRepo;
 
-    @Autowired
     public UrlService(UrlRepo urlRepo) {
         this.urlRepo = urlRepo;
     }

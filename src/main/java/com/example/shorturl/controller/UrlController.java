@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController()
 @RequestMapping("/url")
@@ -61,23 +62,47 @@ public class UrlController {
         return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping()
-    public List<UrlEntity> getAll() {
-        return urlService.getAll();
+    @GetMapping("/getUrl/{shortUrl}")
+    public ResponseEntity<?> getUrlByShortUrl(@PathVariable String shortUrl) {
+        List<UrlEntity> allByShortUrl = urlService.findAllByShortUrl(shortUrl);
+        UrlEntity activeUrl = allByShortUrl.stream()
+                .filter(e -> e.getExpiresTime().isAfter(ZonedDateTime.now()))
+                .findFirst()
+                .orElse(null);
+
+        if (activeUrl == null) {
+            List<UrlEntity> expiredUrl = allByShortUrl.stream()
+                    .filter(e -> e.getExpiresTime().isBefore(ZonedDateTime.now()))
+                    .collect(Collectors.toList());
+
+            if (expiredUrl.isEmpty()) {
+                UrlErrorDto errorDto = new UrlErrorDto("404",
+                        "Url with shorter url " + shortUrl + "  doesn't exist.",
+                        ZonedDateTime.now());
+                return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
+            }
+
+            UrlErrorDto errorDto = new UrlErrorDto("400",
+                    "Shorter url " + shortUrl + " expired. Please create new one",
+                    ZonedDateTime.now());
+            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(new UrlDto(activeUrl.getOriginalUrl()), HttpStatus.OK);
     }
 
-    @GetMapping("/{url}")
-    public ResponseEntity<?> redirectByShortUrl(@PathVariable String url) {
-        if (url.isBlank()) {
+    @GetMapping("/{shortUrl}")
+    public ResponseEntity<?> redirectByShortUrl(@PathVariable String shortUrl) {
+        if (shortUrl.isBlank()) {
             UrlErrorDto errorDto = new UrlErrorDto("400", "Url is empty", ZonedDateTime.now());
             return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
         }
 
-        UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(url, ZonedDateTime.now());
+        UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(shortUrl, ZonedDateTime.now());
 
         if (urlByShortUrl == null) {
             UrlErrorDto errorDto = new UrlErrorDto("400",
-                    "Url with shorter url " + url + " expired or doesn't exist",
+                    "Url with shorter url " + shortUrl + " expired or doesn't exist",
                     ZonedDateTime.now());
             return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
         }
