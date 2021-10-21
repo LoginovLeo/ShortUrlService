@@ -1,9 +1,11 @@
 package com.example.shorturl.controller;
 
 import com.example.shorturl.dto.UrlDto;
+import com.example.shorturl.dto.UrlErrorDto;
 import com.example.shorturl.dto.UrlRespDto;
 import com.example.shorturl.model.UrlEntity;
 import com.example.shorturl.service.UrlService;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,25 +25,40 @@ public class UrlController {
         this.urlService = urlService;
     }
 
-    @PostMapping
+    @PostMapping("/generate")
     public ResponseEntity<?> createShortUrl(@RequestBody UrlDto urlDto) throws NoSuchAlgorithmException {
-        UrlEntity byFullUrl = urlService.findByFullUrl(urlDto.getUrl(), ZonedDateTime.now());
-
-        if (byFullUrl == null){
-            UrlEntity urlEntity = urlService.generateShortLink(urlDto);
-
-            UrlRespDto respDto = new UrlRespDto();
-            respDto.setShortUrl(urlEntity.getShortUrl());
-            respDto.setExpireDate(urlEntity.getExpiresTime());
-
-            return new ResponseEntity<>(respDto, HttpStatus.OK);
+        if (urlDto.getUrl() == null) {
+            UrlErrorDto errorDto = new UrlErrorDto("400",
+                    "Missing param \"url\":  in request body",
+                    ZonedDateTime.now());
+            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
         }
 
-        UrlRespDto respDto = new UrlRespDto();
-        respDto.setShortUrl(byFullUrl.getShortUrl());
-        respDto.setExpireDate(byFullUrl.getExpiresTime());
+        if (new UrlValidator().isValid(urlDto.getUrl())) {
+            UrlEntity byFullUrl = urlService.findByFullUrl(urlDto.getUrl(), ZonedDateTime.now());
 
-        return new ResponseEntity<>(respDto, HttpStatus.OK);
+            if (byFullUrl == null) {
+                UrlEntity urlEntity = urlService.generateShortLink(urlDto);
+
+                UrlRespDto respDto = new UrlRespDto();
+                respDto.setShortUrl(urlEntity.getShortUrl());
+                respDto.setExpireDate(urlEntity.getExpiresTime());
+
+                return new ResponseEntity<>(respDto, HttpStatus.OK);
+            }
+
+            UrlRespDto respDto = new UrlRespDto();
+            respDto.setShortUrl(byFullUrl.getShortUrl());
+            respDto.setExpireDate(byFullUrl.getExpiresTime());
+
+            return new ResponseEntity<>(respDto, HttpStatus.OK);
+
+        }
+
+        UrlErrorDto errorDto = new UrlErrorDto("400",
+                "The parameter " + urlDto.getUrl() + " in the request body is not url. Please try again",
+                ZonedDateTime.now());
+        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping()
@@ -49,18 +66,24 @@ public class UrlController {
         return urlService.getAll();
     }
 
-    @GetMapping("{url}")
+    @GetMapping("/{url}")
     public ResponseEntity<?> redirectByShortUrl(@PathVariable String url) {
-        UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(url, ZonedDateTime.now());
-
-        if (urlByShortUrl == null){
-            return new ResponseEntity<>("Url with shorter url " + url + " expired", HttpStatus.NOT_FOUND);
+        if (url.isBlank()) {
+            UrlErrorDto errorDto = new UrlErrorDto("400", "Url is empty", ZonedDateTime.now());
+            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
         }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", urlByShortUrl.getOriginalUrl());
-            return new ResponseEntity<String>(headers, HttpStatus.FOUND);
+        UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(url, ZonedDateTime.now());
 
+        if (urlByShortUrl == null) {
+            UrlErrorDto errorDto = new UrlErrorDto("400",
+                    "Url with shorter url " + url + " expired or doesn't exist",
+                    ZonedDateTime.now());
+            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        }
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", urlByShortUrl.getOriginalUrl());
+        return new ResponseEntity<String>(headers, HttpStatus.FOUND);
     }
 }
