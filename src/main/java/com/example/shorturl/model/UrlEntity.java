@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 public class UrlEntity {
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
 
@@ -23,6 +24,17 @@ public class UrlEntity {
 
     @Column(name = "created_time", nullable = false)
     private ZonedDateTime createdTime;
+
+    @Column(name = "expires_at")
+    private ZonedDateTime expiresTime;
+
+    public ZonedDateTime getExpiresTime() {
+        return expiresTime;
+    }
+
+    public void setExpiresTime(ZonedDateTime expiresTime) {
+        this.expiresTime = expiresTime;
+    }
 
     public ZonedDateTime getCreatedTime() {
         return createdTime;
@@ -54,5 +66,16 @@ public class UrlEntity {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "UrlEntity{" +
+                "id=" + id +
+                ", originalUrl='" + originalUrl + '\'' +
+                ", shortUrl='" + shortUrl + '\'' +
+                ", createdTime=" + createdTime +
+                ", expiresTime=" + expiresTime +
+                '}';
     }
 }

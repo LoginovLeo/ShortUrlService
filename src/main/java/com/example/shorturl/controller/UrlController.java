@@ -1,18 +1,15 @@
 package com.example.shorturl.controller;
 
+import com.example.shorturl.dto.UrlDto;
+import com.example.shorturl.dto.UrlRespDto;
 import com.example.shorturl.model.UrlEntity;
 import com.example.shorturl.service.UrlService;
-import netscape.javascript.JSObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -26,20 +23,44 @@ public class UrlController {
         this.urlService = urlService;
     }
 
+    @PostMapping
+    public ResponseEntity<?> createShortUrl(@RequestBody UrlDto urlDto) throws NoSuchAlgorithmException {
+        UrlEntity byFullUrl = urlService.findByFullUrl(urlDto.getUrl(), ZonedDateTime.now());
+
+        if (byFullUrl == null){
+            UrlEntity urlEntity = urlService.generateShortLink(urlDto);
+
+            UrlRespDto respDto = new UrlRespDto();
+            respDto.setShortUrl(urlEntity.getShortUrl());
+            respDto.setExpireDate(urlEntity.getExpiresTime());
+
+            return new ResponseEntity<>(respDto, HttpStatus.OK);
+        }
+
+        UrlRespDto respDto = new UrlRespDto();
+        respDto.setShortUrl(byFullUrl.getShortUrl());
+        respDto.setExpireDate(byFullUrl.getExpiresTime());
+
+        return new ResponseEntity<>(respDto, HttpStatus.OK);
+    }
+
     @GetMapping()
     public List<UrlEntity> getAll() {
         return urlService.getAll();
     }
 
     @GetMapping("{url}")
-    public ResponseEntity<?> findByShortUrl(@PathVariable String url) {
-        UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(url);
-        if (urlByShortUrl != null) {
+    public ResponseEntity<?> redirectByShortUrl(@PathVariable String url) {
+        UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(url, ZonedDateTime.now());
+
+        if (urlByShortUrl == null){
+            return new ResponseEntity<>("Url with shorter url " + url + " expired", HttpStatus.NOT_FOUND);
+        }
+
             HttpHeaders headers = new HttpHeaders();
             headers.add("Location", urlByShortUrl.getOriginalUrl());
             return new ResponseEntity<String>(headers, HttpStatus.FOUND);
-        } else {
-            return new ResponseEntity<>("Url with shorter url " + url + " not found", HttpStatus.NOT_FOUND);
-        }
+
+
     }
 }
