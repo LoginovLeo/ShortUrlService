@@ -3,16 +3,16 @@ package com.loginov.shorturl.exeption;
 import java.time.ZonedDateTime;
 
 public class ErrorMessage {
-    private String statusCode;
+    private ZonedDateTime timestamp;
+    private String status;
     private String errorMsg;
     private String description;
-    private ZonedDateTime timestamp;
 
-    public ErrorMessage(String statusCode, String errorMsg, String description, ZonedDateTime timestamp) {
-        this.statusCode = statusCode;
+    public ErrorMessage(ZonedDateTime timestamp, String status, String errorMsg, String description) {
+        this.timestamp = timestamp;
+        this.status = status;
         this.errorMsg = errorMsg;
         this.description = description;
-        this.timestamp = timestamp;
     }
 
     public ZonedDateTime getTimestamp() {
@@ -23,12 +23,12 @@ public class ErrorMessage {
         this.timestamp = timestamp;
     }
 
-    public String getStatusCode() {
-        return statusCode;
+    public String getStatus() {
+        return status;
     }
 
-    public void setStatusCode(String statusCode) {
-        this.statusCode = statusCode;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getErrorMsg() {

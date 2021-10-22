@@ -3,7 +3,8 @@ package com.loginov.shorturl.controller;
 import com.loginov.shorturl.dto.UrlDto;
 import com.loginov.shorturl.dto.UrlErrorDto;
 import com.loginov.shorturl.dto.UrlRespDto;
-import com.loginov.shorturl.exeption.MissingParamUrl;
+import com.loginov.shorturl.exeption.customexceptions.CustomBadRequestException;
+import com.loginov.shorturl.exeption.customexceptions.CustomNotFoundException;
 import com.loginov.shorturl.model.UrlEntity;
 import com.loginov.shorturl.service.UrlService;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -30,7 +31,7 @@ public class UrlController {
     @PostMapping("/generate")
     public ResponseEntity<?> createShortUrl(@RequestBody UrlDto urlDto) throws NoSuchAlgorithmException {
         if (urlDto.getUrl() == null) {
-            throw new MissingParamUrl("Missing param url in request body");
+            throw new CustomNotFoundException("Missing param url in request body");
         }
 
         if (new UrlValidator().isValid(urlDto.getUrl())) {
@@ -54,10 +55,8 @@ public class UrlController {
 
         }
 
-        UrlErrorDto errorDto = new UrlErrorDto("400",
-                "The parameter " + urlDto.getUrl() + " in the request body is not url. Please try again",
-                ZonedDateTime.now());
-        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        throw new CustomBadRequestException(
+                "The parameter: '" + urlDto.getUrl() + "' in  request body is not url. Please try again");
     }
 
     @GetMapping("/getUrl/{shortUrl}")
@@ -74,16 +73,10 @@ public class UrlController {
                     .collect(Collectors.toList());
 
             if (expiredUrl.isEmpty()) {
-                UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.NOT_FOUND.toString(),
-                        "Url with shorter url " + shortUrl + "  doesn't exist.",
-                        ZonedDateTime.now());
-                return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
+                throw new CustomNotFoundException("Url with shorter url " + shortUrl + "  doesn't exist.");
             }
 
-            UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.BAD_REQUEST.toString(),
-                    "Shorter url " + shortUrl + " expired. Please create new one",
-                    ZonedDateTime.now());
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+            throw new CustomBadRequestException("Shorter url " + shortUrl + " expired. Please create new one");
         }
 
         return new ResponseEntity<>(new UrlDto(activeUrl.getOriginalUrl()), HttpStatus.OK);
@@ -92,17 +85,13 @@ public class UrlController {
     @GetMapping("/{shortUrl}")
     public ResponseEntity<?> redirectByShortUrl(@PathVariable String shortUrl) {
         if (shortUrl.isBlank()) {
-            UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.BAD_REQUEST.toString(), "Url is empty", ZonedDateTime.now());
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+           throw new CustomBadRequestException("Url is empty");
         }
 
         UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(shortUrl, ZonedDateTime.now());
 
         if (urlByShortUrl == null) {
-            UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.BAD_REQUEST.toString(),
-                    "Url with shorter url " + shortUrl + " expired or doesn't exist",
-                    ZonedDateTime.now());
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+           throw new CustomBadRequestException("Url with shorter url " + shortUrl + " expired or doesn't exist");
         }
 
         HttpHeaders headers = new HttpHeaders();
