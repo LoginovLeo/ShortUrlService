@@ -3,6 +3,7 @@ package com.example.shorturl.controller;
 import com.example.shorturl.dto.UrlDto;
 import com.example.shorturl.dto.UrlErrorDto;
 import com.example.shorturl.dto.UrlRespDto;
+import com.example.shorturl.exeption.MissingParamUrl;
 import com.example.shorturl.model.UrlEntity;
 import com.example.shorturl.service.UrlService;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -29,10 +30,7 @@ public class UrlController {
     @PostMapping("/generate")
     public ResponseEntity<?> createShortUrl(@RequestBody UrlDto urlDto) throws NoSuchAlgorithmException {
         if (urlDto.getUrl() == null) {
-            UrlErrorDto errorDto = new UrlErrorDto("400",
-                    "Missing param \"url\":  in request body",
-                    ZonedDateTime.now());
-            return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+            throw new MissingParamUrl("Missing param url in request body");
         }
 
         if (new UrlValidator().isValid(urlDto.getUrl())) {
@@ -76,13 +74,13 @@ public class UrlController {
                     .collect(Collectors.toList());
 
             if (expiredUrl.isEmpty()) {
-                UrlErrorDto errorDto = new UrlErrorDto("404",
+                UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.NOT_FOUND.toString(),
                         "Url with shorter url " + shortUrl + "  doesn't exist.",
                         ZonedDateTime.now());
                 return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
             }
 
-            UrlErrorDto errorDto = new UrlErrorDto("400",
+            UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.BAD_REQUEST.toString(),
                     "Shorter url " + shortUrl + " expired. Please create new one",
                     ZonedDateTime.now());
             return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
@@ -94,14 +92,14 @@ public class UrlController {
     @GetMapping("/{shortUrl}")
     public ResponseEntity<?> redirectByShortUrl(@PathVariable String shortUrl) {
         if (shortUrl.isBlank()) {
-            UrlErrorDto errorDto = new UrlErrorDto("400", "Url is empty", ZonedDateTime.now());
+            UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.BAD_REQUEST.toString(), "Url is empty", ZonedDateTime.now());
             return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
         }
 
         UrlEntity urlByShortUrl = urlService.findUrlByShortUrl(shortUrl, ZonedDateTime.now());
 
         if (urlByShortUrl == null) {
-            UrlErrorDto errorDto = new UrlErrorDto("400",
+            UrlErrorDto errorDto = new UrlErrorDto(HttpStatus.BAD_REQUEST.toString(),
                     "Url with shorter url " + shortUrl + " expired or doesn't exist",
                     ZonedDateTime.now());
             return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
