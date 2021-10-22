@@ -1,17 +1,13 @@
-package com.example.shorturl.service;
+package com.loginov.shorturl.service;
 
-import com.example.shorturl.dto.UrlDto;
-import com.example.shorturl.model.UrlEntity;
-import com.example.shorturl.repository.UrlRepo;
-import org.apache.tomcat.util.buf.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.loginov.shorturl.dto.UrlDto;
+import com.loginov.shorturl.model.UrlEntity;
+import com.loginov.shorturl.repository.UrlRepo;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 

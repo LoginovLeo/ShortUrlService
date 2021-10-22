@@ -1,11 +1,11 @@
-package com.example.shorturl.controller;
+package com.loginov.shorturl.controller;
 
-import com.example.shorturl.dto.UrlDto;
-import com.example.shorturl.dto.UrlErrorDto;
-import com.example.shorturl.dto.UrlRespDto;
-import com.example.shorturl.exeption.MissingParamUrl;
-import com.example.shorturl.model.UrlEntity;
-import com.example.shorturl.service.UrlService;
+import com.loginov.shorturl.dto.UrlDto;
+import com.loginov.shorturl.dto.UrlErrorDto;
+import com.loginov.shorturl.dto.UrlRespDto;
+import com.loginov.shorturl.exeption.MissingParamUrl;
+import com.loginov.shorturl.model.UrlEntity;
+import com.loginov.shorturl.service.UrlService;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

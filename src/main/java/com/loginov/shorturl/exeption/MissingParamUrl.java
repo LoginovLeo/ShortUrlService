@@ -1,4 +1,4 @@
-package com.example.shorturl.exeption;
+package com.loginov.shorturl.exeption;
 
 public class MissingParamUrl extends RuntimeException{
 

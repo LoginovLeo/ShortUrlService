@@ -1,6 +1,6 @@
-package com.example.shorturl.repository;
+package com.loginov.shorturl.repository;
 
-import com.example.shorturl.model.UrlEntity;
+import com.loginov.shorturl.model.UrlEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

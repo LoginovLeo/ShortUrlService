@@ -1,4 +1,4 @@
-package com.example.shorturl.model;
+package com.loginov.shorturl.model;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;

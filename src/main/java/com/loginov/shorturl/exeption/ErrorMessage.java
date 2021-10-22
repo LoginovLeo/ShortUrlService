@@ -1,4 +1,4 @@
-package com.example.shorturl.exeption;
+package com.loginov.shorturl.exeption;
 
 import java.time.ZonedDateTime;
 
