@@ -1,18 +1,22 @@
 package com.loginov.shorturl.controller;
 
 import com.loginov.shorturl.dto.UrlDto;
-import com.loginov.shorturl.dto.UrlErrorDto;
 import com.loginov.shorturl.dto.UrlRespDto;
 import com.loginov.shorturl.exeption.customexceptions.CustomBadRequestException;
 import com.loginov.shorturl.exeption.customexceptions.CustomNotFoundException;
 import com.loginov.shorturl.model.UrlEntity;
+import com.loginov.shorturl.service.RequestService;
 import com.loginov.shorturl.service.UrlService;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -21,17 +25,30 @@ import java.util.stream.Collectors;
 @RestController()
 @RequestMapping("/url")
 public class UrlController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlController.class);
+
+
 
     private final UrlService urlService;
 
-    public UrlController(UrlService urlService) {
+    private final RequestService requestService;
+
+
+
+    public UrlController(UrlService urlService, RequestService requestService) {
         this.urlService = urlService;
+        this.requestService = requestService;
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<?> createShortUrl(@RequestBody UrlDto urlDto) throws NoSuchAlgorithmException {
+    public ResponseEntity<?> createShortUrl(HttpServletRequest request, HttpServletResponse response, @RequestBody UrlDto urlDto) throws NoSuchAlgorithmException {
+
+        requestService.chekSessions();
+
+
+
         if (urlDto.getUrl() == null) {
-            throw new CustomNotFoundException("Missing param url in request body");
+            throw new CustomNotFoundException("Missing param: 'url' in request body" );
         }
 
         if (new UrlValidator().isValid(urlDto.getUrl())) {
@@ -44,6 +61,8 @@ public class UrlController {
                 respDto.setShortUrl(urlEntity.getShortUrl());
                 respDto.setExpireDate(urlEntity.getExpiresTime());
 
+                LOGGER.info("Generate new short URL: " + urlEntity.getShortUrl());
+
                 return new ResponseEntity<>(respDto, HttpStatus.OK);
             }
 
@@ -51,9 +70,12 @@ public class UrlController {
             respDto.setShortUrl(byFullUrl.getShortUrl());
             respDto.setExpireDate(byFullUrl.getExpiresTime());
 
+            LOGGER.info("Get exist short URL: " + byFullUrl.getShortUrl());
+
             return new ResponseEntity<>(respDto, HttpStatus.OK);
 
         }
+
 
         throw new CustomBadRequestException(
                 "The parameter: '" + urlDto.getUrl() + "' in  request body is not url. Please try again");

@@ -12,4 +12,12 @@ public class ShortUrlServiceApplication {
         SpringApplication.run(ShortUrlServiceApplication.class, args);
     }
 
+//    @Bean
+//    public FilterRegistrationBean<FilterUrlGenerate> someFilterRegistration() {
+//
+//        FilterRegistrationBean<FilterUrlGenerate> registration = new FilterRegistrationBean();
+//        registration.setFilter(new FilterUrlGenerate());
+//        registration.addUrlPatterns("/url/generate");
+//        return registration;
+//    }
 }

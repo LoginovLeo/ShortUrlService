@@ -2,6 +2,8 @@ package com.loginov.shorturl.exeption;
 
 import com.loginov.shorturl.exeption.customexceptions.CustomBadRequestException;
 import com.loginov.shorturl.exeption.customexceptions.CustomNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,8 +20,12 @@ import java.util.Objects;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerExceptionHandler.class);
+
     @ExceptionHandler(CustomNotFoundException.class)
     public ResponseEntity<?> handleCustomNotFoundException(CustomNotFoundException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
+
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(),
                 HttpStatus.NOT_FOUND.toString(),
@@ -31,6 +37,8 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(CustomBadRequestException.class)
     public ResponseEntity<?> handleCustomBadRequestException(CustomBadRequestException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
+
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(),
                 HttpStatus.BAD_REQUEST.toString(),
@@ -42,6 +50,8 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<?> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
+
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(),
                 HttpStatus.BAD_REQUEST.toString(),
@@ -53,6 +63,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorMessage> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(),
@@ -65,6 +76,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorMessage> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.METHOD_NOT_ALLOWED + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(),
@@ -77,6 +89,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorMessage> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(),
