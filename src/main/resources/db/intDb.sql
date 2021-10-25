@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS url;
-DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS request;
 
 CREATE TABLE url
 (
@@ -10,18 +10,6 @@ CREATE TABLE url
     expires_at      TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT pk_url PRIMARY KEY (id)
 );
-
-CREATE TABLE sessions
-(
-    id              		SERIAL NOT NULL,
-    client_ip       		VARCHAR NOT NULL,
-    expires_at    			TIMESTAMP WITH TIME ZONE NOT NULL,
-    locked_until    		TIMESTAMP WITH TIME ZONE NOT NULL,
-    available_connections	INTEGER NOT NULL,
-    CONSTRAINT pk_session PRIMARY KEY (id)
-);
-
-DROP TABLE IF EXISTS request;
 
 CREATE TABLE request
 (

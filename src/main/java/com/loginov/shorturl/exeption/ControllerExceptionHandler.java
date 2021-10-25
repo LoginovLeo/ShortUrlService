@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -83,10 +84,23 @@ public class ControllerExceptionHandler {
         ErrorMessage message = new ErrorMessage(
                 ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.BAD_REQUEST.toString(),
-                ex.getMessage(),
+                Objects.requireNonNull(ex.getMessage()).concat(" Request body must contain 'url'"),
                 request.getDescription(false));
 
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoSuchAlgorithmException.class)
+    public ResponseEntity<ErrorMessage> handleNoSuchAlgorithmException(NoSuchAlgorithmException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
+
+        ErrorMessage message = new ErrorMessage(
+                ZonedDateTime.now(ZoneOffset.UTC),
+                HttpStatus.METHOD_NOT_ALLOWED.toString(),
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(message, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

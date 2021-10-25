@@ -3,6 +3,7 @@ package com.loginov.shorturl.service;
 import com.loginov.shorturl.dto.UrlDto;
 import com.loginov.shorturl.model.UrlEntity;
 import com.loginov.shorturl.repository.UrlRepo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UrlService {
+    @Value("${url.expiredtime}")
+    private int liveTime;
 
     private final UrlRepo urlRepo;
 
@@ -45,7 +48,7 @@ public class UrlService {
         urlToSave.setCreatedTime(ZonedDateTime.now(ZoneOffset.UTC));
         urlToSave.setOriginalUrl(urlDto.getUrl());
         urlToSave.setShortUrl(encodedUrl);
-        urlToSave.setExpiresTime(urlToSave.getCreatedTime().plusMinutes(1));
+        urlToSave.setExpiresTime(urlToSave.getCreatedTime().plusMinutes(liveTime));
 
         return saveShortLink(urlToSave);
     }

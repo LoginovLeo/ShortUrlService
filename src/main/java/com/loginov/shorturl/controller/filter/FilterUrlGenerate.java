@@ -76,7 +76,7 @@ public class FilterUrlGenerate implements Filter {
         if (xfHeader == null) {
             return request.getRemoteAddr();
         }
-        return xfHeader.split(",")[0]; // voor als ie achter een proxy zit
+        return xfHeader.split(",")[0];
     }
 
 

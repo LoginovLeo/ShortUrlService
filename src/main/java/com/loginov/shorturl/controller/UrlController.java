@@ -24,6 +24,12 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+/**
+ * A controller class for generating, retrieving and redirecting URLs.
+ *
+ * @author Logionov Leonid
+ * @version 1.0
+ */
 @RestController()
 @RequestMapping("/api")
 @Tag(name = "Url controller", description = "main controller")
@@ -38,23 +44,23 @@ public class UrlController {
         this.requestService = requestService;
     }
 
+    /**
+     * Create new short URL o returns exist don't expired short URL
+     * @param urlDto - url to generate shorter
+     */
     @PostMapping("/generate")
-    @Operation(
-            summary = "Create Short Url",
-            description = "Allows to generate short url"
-    )
+    @Operation(summary = "Create Short Url",
+            description = "Allows to generate short url")
     public ResponseEntity<?> createShortUrl(
             @RequestBody @Parameter(description = "Full URL for generate short URL") UrlDto urlDto) throws NoSuchAlgorithmException {
 
         requestService.chekSessions();
-
         if (urlDto.getUrl() == null) {
             throw new CustomBadRequestException("Missing param: 'url' in request body");
         }
 
         if (new UrlValidator().isValid(urlDto.getUrl())) {
             UrlEntity byFullUrl = urlService.findByFullUrl(urlDto.getUrl(), ZonedDateTime.now(ZoneOffset.UTC));
-
             if (byFullUrl == null) {
                 UrlEntity urlEntity = urlService.generateShortLink(urlDto);
 
@@ -81,13 +87,15 @@ public class UrlController {
                 "The parameter: '" + urlDto.getUrl() + "' in  request body is not url. Please try again");
     }
 
+    /**
+     * Getting full URL by short URL
+     * @param shortUrl - short url
+     */
     @GetMapping("/getUrl/{shortUrl}")
-    @Operation(
-            summary = "Get URL by short URL",
-            description = "Allows to get full URL by generated URL"
-    )
+    @Operation(summary = "Get URL by short URL",
+            description = "Allows to get full URL by generated URL")
     public ResponseEntity<?> getUrlByShortUrl(
-            @PathVariable @Parameter(description = "Short URL for get full URL")String shortUrl) {
+            @PathVariable @Parameter(description = "Short URL for get full URL") String shortUrl) {
 
         List<UrlEntity> allByShortUrl = urlService.findAllByShortUrl(shortUrl);
         if (allByShortUrl.isEmpty()) {
@@ -103,13 +111,15 @@ public class UrlController {
         return new ResponseEntity<>(new UrlDto(activeUrl.getOriginalUrl()), HttpStatus.OK);
     }
 
+    /**
+     * Redirect to full URL by short URL
+     * @param shortUrl - short url
+     */
     @GetMapping("/{shortUrl}")
-    @Operation(
-            summary = "Redirect",
-            description = "Allows to redirect by short URL"
-    )
+    @Operation(summary = "Redirect",
+            description = "Allows to redirect by short URL")
     public ResponseEntity<?> redirectByShortUrl(
-            @PathVariable @Parameter(description = "Short URL to redirect")String shortUrl) {
+            @PathVariable @Parameter(description = "Short URL to redirect") String shortUrl) {
 
         if (shortUrl.isBlank()) {
             throw new CustomBadRequestException("Parameter 'shortUrl' is empty");

@@ -7,7 +7,6 @@ public class UrlRespDto {
     private String shortUrl;
     private ZonedDateTime expireDate;
 
-
     public UrlRespDto() {
     }
 

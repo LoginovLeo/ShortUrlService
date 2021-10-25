@@ -12,9 +12,13 @@ import java.time.ZonedDateTime;
 @Service
 public class RequestService {
     @Value("${request.maxlimit}")
-    private  int limitRequests;
+    private int limitRequests;
     @Value("${request.timelimit}")
     private int timeLimit;
+    @Value("${request.blocktime}")
+    private int blockTime;
+
+    private final int ID = 1;
 
     private final RequestRepo requestRepo;
 
@@ -27,12 +31,12 @@ public class RequestService {
     }
 
     public RequestEntity getSessions() {
-        return requestRepo.getById(1);
+        return requestRepo.getById(ID);
     }
 
     public void chekSessions() {
 
-        RequestEntity sessions = requestRepo.getById(1);
+        RequestEntity sessions = requestRepo.getById(ID);
 
 
         if (sessions.getLastRequest().isBefore(ZonedDateTime.now(ZoneOffset.UTC).minusSeconds(timeLimit))) {
@@ -46,7 +50,7 @@ public class RequestService {
         }
 
         if (sessions.getAvailableConnections() == 0) {
-            sessions.setLockedUntil(ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(timeLimit));
+            sessions.setLockedUntil(ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(blockTime));
             sessions.setAvailableConnections(limitRequests);
             requestRepo.save(sessions);
             throw new CustomToManyRequestException("Too many requests. Please try later");
