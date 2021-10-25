@@ -1,7 +1,6 @@
 package com.loginov.shorturl.model;
 
 import javax.persistence.*;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 @Table(name = "url", indexes = {
@@ -14,10 +13,8 @@ public class UrlEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
-
     @Column(name = "original_url", nullable = false)
     private String originalUrl;
-
 
     @Column(name = "short_url", nullable = false)
     private String shortUrl;

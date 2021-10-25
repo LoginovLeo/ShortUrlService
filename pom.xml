@@ -16,15 +16,33 @@
     <properties>
         <java.version>11</java.version>
         <apache-commons-validator.version>1.7</apache-commons-validator.version>
+        <guava.version>31.0.1-jre</guava.version>
+        <swagger.version>2.1.10</swagger.version>
+        <springdoc.version>1.5.12</springdoc.version>
     </properties>
     <dependencies>
 
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.0.1-jre</version>
+            <version>${guava.version}</version>
         </dependency>
 
+        <!-- SWAGGER -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+
+
+        <!-- Spring Boot -->
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>

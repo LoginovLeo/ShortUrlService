@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UrlService {
@@ -24,15 +26,15 @@ public class UrlService {
         return urlRepo.findAll();
     }
 
-    public UrlEntity findByFullUrl(String fullUrl, ZonedDateTime time){
-        return urlRepo.findUrlEntityByOriginalUrlAndExpiresTime(fullUrl,time);
+    public UrlEntity findByFullUrl(String fullUrl, ZonedDateTime time) {
+        return urlRepo.findUrlEntityByOriginalUrlAndExpiresTime(fullUrl, time);
     }
 
-    public UrlEntity findUrlByShortUrl(String shorter, ZonedDateTime time) {
+    public UrlEntity findUrlEntityByOriginalUrlAndExpiresTime(String shorter, ZonedDateTime time) {
         return urlRepo.findUrlByShortUrl(shorter, time);
     }
 
-    public List<UrlEntity> findAllByShortUrl(String shortUrl){
+    public List<UrlEntity> findAllByShortUrl(String shortUrl) {
         return urlRepo.findAllByShortUrl(shortUrl);
     }
 
@@ -40,7 +42,7 @@ public class UrlService {
         String encodedUrl = encodedUrl(urlDto.getUrl());
 
         UrlEntity urlToSave = new UrlEntity();
-        urlToSave.setCreatedTime(ZonedDateTime.now());
+        urlToSave.setCreatedTime(ZonedDateTime.now(ZoneOffset.UTC));
         urlToSave.setOriginalUrl(urlDto.getUrl());
         urlToSave.setShortUrl(encodedUrl);
         urlToSave.setExpiresTime(urlToSave.getCreatedTime().plusMinutes(1));
@@ -54,6 +56,19 @@ public class UrlService {
         byte[] digest = md.digest();
         String fullEncodeUrl = DatatypeConverter.printHexBinary(digest);
         return fullEncodeUrl.substring(0, 6);
+    }
+
+    public UrlEntity getActive(List<UrlEntity> urlEntities) {
+        return urlEntities.stream()
+                .filter(e -> e.getExpiresTime().isAfter(ZonedDateTime.now(ZoneOffset.UTC)))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<UrlEntity> getExpired(List<UrlEntity> urlEntities) {
+        return urlEntities.stream()
+                .filter(e -> e.getExpiresTime().isBefore(ZonedDateTime.now(ZoneOffset.UTC)))
+                .collect(Collectors.toList());
     }
 
     public UrlEntity saveShortLink(UrlEntity urlEntity) {

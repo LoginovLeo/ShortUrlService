@@ -2,6 +2,7 @@ package com.loginov.shorturl.exeption;
 
 import com.loginov.shorturl.exeption.customexceptions.CustomBadRequestException;
 import com.loginov.shorturl.exeption.customexceptions.CustomNotFoundException;
+import com.loginov.shorturl.exeption.customexceptions.CustomToManyRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -27,7 +29,7 @@ public class ControllerExceptionHandler {
         LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.NOT_FOUND.toString(),
                 ex.getMessage(),
                 request.getDescription(false));
@@ -40,7 +42,7 @@ public class ControllerExceptionHandler {
         LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.BAD_REQUEST.toString(),
                 ex.getMessage(),
                 request.getDescription(false));
@@ -48,12 +50,25 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(CustomToManyRequestException.class)
+    public ResponseEntity<?> handleCustomToManyRequestException(CustomToManyRequestException ex, WebRequest request) {
+        LOGGER.error(HttpStatus.TOO_MANY_REQUESTS + " " + ex.getMessage());
+
+        ErrorMessage message = new ErrorMessage(
+                ZonedDateTime.now(ZoneOffset.UTC),
+                HttpStatus.TOO_MANY_REQUESTS.toString(),
+                ex.getMessage(),
+                request.getDescription(false));
+
+        return new ResponseEntity<>(message, HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<?> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex, WebRequest request) {
         LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.BAD_REQUEST.toString(),
                 ex.getParameterName().concat(" parameter is missing"),
                 request.getDescription(false));
@@ -66,7 +81,7 @@ public class ControllerExceptionHandler {
         LOGGER.error(HttpStatus.BAD_REQUEST + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.BAD_REQUEST.toString(),
                 ex.getMessage(),
                 request.getDescription(false));
@@ -79,7 +94,7 @@ public class ControllerExceptionHandler {
         LOGGER.error(HttpStatus.METHOD_NOT_ALLOWED + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.METHOD_NOT_ALLOWED.toString(),
                 ex.getMessage().concat(". Supported methods ").concat(Objects.requireNonNull(ex.getSupportedHttpMethods()).toString()),
                 request.getDescription(false));
@@ -92,7 +107,7 @@ public class ControllerExceptionHandler {
         LOGGER.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE + " " + ex.getMessage());
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.UNSUPPORTED_MEDIA_TYPE.toString(),
                 ex.getMessage().concat(". Supported types ").concat(Objects.requireNonNull(ex.getSupportedMediaTypes()).toString()),
                 request.getDescription(false));
@@ -104,7 +119,7 @@ public class ControllerExceptionHandler {
     public ResponseEntity<ErrorMessage> globalHandler(Exception ex, WebRequest request) {
 
         ErrorMessage message = new ErrorMessage(
-                ZonedDateTime.now(),
+                ZonedDateTime.now(ZoneOffset.UTC),
                 HttpStatus.INTERNAL_SERVER_ERROR.toString(),
                 ex.getMessage(),
                 request.getDescription(false));

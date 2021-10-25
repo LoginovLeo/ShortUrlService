@@ -1,7 +1,6 @@
 package com.loginov.shorturl.model;
 
 import javax.persistence.*;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 @Table(name = "request")
@@ -18,7 +17,7 @@ public class RequestEntity {
     @Column(name = "locked_until", nullable = false)
     private ZonedDateTime lockedUntil;
 
-    @Column(name = "last_request",  nullable = false)
+    @Column(name = "last_request", nullable = false)
     private ZonedDateTime lastRequest;
 
     public ZonedDateTime getLastRequest() {
