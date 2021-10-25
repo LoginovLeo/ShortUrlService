@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@Repository
+
 public interface UrlRepo extends JpaRepository<UrlEntity, Integer> {
 
     @Query("SELECT u FROM UrlEntity u WHERE u.shortUrl = ?1 AND u.expiresTime > ?2")

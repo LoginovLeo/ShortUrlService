@@ -46,6 +46,7 @@ public class UrlController {
 
     /**
      * Create new short URL o returns exist don't expired short URL
+     *
      * @param urlDto - url to generate shorter
      */
     @PostMapping("/generate")
@@ -89,6 +90,7 @@ public class UrlController {
 
     /**
      * Getting full URL by short URL
+     *
      * @param shortUrl - short url
      */
     @GetMapping("/getUrl/{shortUrl}")
@@ -113,6 +115,7 @@ public class UrlController {
 
     /**
      * Redirect to full URL by short URL
+     *
      * @param shortUrl - short url
      */
     @GetMapping("/{shortUrl}")
